@@ -1,0 +1,9 @@
+-BEGIN HEADER-
+NASA/POWER Source Native Resolution Hourly Data
+Dates (month/day/year): 01/01/2018 through 12/31/2024 in LST
+Location: Latitude  51.0438   Longitude -114.0534
+Elevation from MERRA-2: Average for 0.5 x 0.625 degree lat/lon region = 1039.79 meters
+The value for missing source data that cannot be computed or is outside of the sources availability range: -999
+Parameter(s):
+ALLSKY_SFC_SW_DWN     CERES SYN1deg All Sky Surface Shortwave Downward Irradiance (Wh/m^2)
+-END HEADER-
