@@ -34,8 +34,40 @@ class Preprocessing:
             Right input DataFrame.
         merge_dim: str
             Dimension along which to perform the merge. See pandas docs.
-        join_method: str
+        join_method: label or list
             Join type passed to pandas.DataFrame.merge. See pandas docs.
         """
         df_merged = df_left.merge(df_right, on=merge_dim, how=join_method)
         return df_merged
+
+    def misc_production(self):
+        """A purely organizational method to clean-up the production data.
+        """
+
+        self.df_production['date'] = pd.to_datetime(self.df_production['date'])
+        # change the names of the locations to something easier to work with
+        self.df_production['location'] = self.df_production['name'].replace({"Bearspaw Water Treatment Plant": "Bearspaw",
+                                                                   "Calgary Fire Hall Headquarters": "Fire Headquarters",
+                                                                   "City of Calgary North Corporate Warehouse": "Corp. Warehouse",
+                                                                   "Glenmore Water Treatment Plant": "Glenmore",
+                                                                   "Hillhurst Sunnyside Community Association": "Hillhurst",
+                                                                   "Manchester Building M": "Manchester",
+                                                                   "Richmond - Knob Hill Community Hall": "Richmond",
+                                                                   "Southland Leisure Centre": "Southland",
+                                                                   "Whitehorn Multi-Service Centre": "Whitehorn"})
+
+        # remove Telus Spark location - not enough data
+        self.df_production = self.df_production[self.df_production['name'] != "Telus Spark"]
+        # drop redundant name column, sort data by date for later merge with weather data
+        self.df_production = self.df_production.drop(columns=['name']).set_index('date')
+        self.df_production.sort_index(inplace=True)
+
+        # Data after 25 September 2023 changed to units of Watts instead of kW
+        date_start = pd.to_datetime('2023-09-25')
+        date_end = pd.to_datetime('2025-12-31')
+        # Create mask for rows between start and end dates
+        mask = (self.df_production.index >= date_start) & (self.df_production.index <= date_end)
+        # Apply the conversion
+        self.df_production.loc[mask, 'kWh'] = self.df_production.loc[mask, 'kWh'] / 1000
+
+        return self.df_production

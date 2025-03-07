@@ -36,14 +36,29 @@ class ModelLinear:
         ]
         return Pipeline(steps)
 
-    def train_model(self, x_train = None, y_train = None, fit_int = True):
-        """Train a linear regression model with input x_train and target y_train.
-           Performs feature scaling and regularization."""
+    def train_model(self, features = None, target = None):
+        """Train a linear regression model with input feature and target.
+           Performs feature scaling and regularization using sklearn.pipeline.Pipeline.
+
+        Parameters
+        ------------
+        features: pandas.DataFrame, array
+            Input data (target must be removed).
+        target: pandas.DataFrame, array
+            Target variable.
+
+        Returns
+        ------------
+        sklearn.pipeline.Pipeline, x_test, y_test
+        """
+
+        x_train, x_test, y_train, y_test = train_test_split(features, target, random_state=0,
+                                                           test_size=0.2)
 
         pipeline = self.linear_pipeline()
 
         pipeline.fit(x_train, y_train)
-        return pipeline
+        return pipeline, x_test, y_test
 
     def get_kbest(self, features = None, target = None, k = 5):
         """Get only the features which the model is trained on when SelectKBest method is used.
@@ -58,7 +73,7 @@ class ModelLinear:
         return features_df_new
 
     def grid_search(self, features = None, target = None,
-                    num_features = np.arange(2, 10),
+                    num_features = np.arange(2, 12),
                     n_poly_degree = np.arange(2,7),
                     alpha = np.array([0.1, 1, 10, 50]),
                     eval_metric = 'neg_mean_absolute_error'):
@@ -76,13 +91,15 @@ class ModelLinear:
         alpha: list, array of int
             Potential regularization terms to try.
         eval_metric: str
-            Metric used to compare different models. Refer to sklearn.model_selection.GridSearchCV "scoring" param.
+            Metric used to compare different hyperparam combinations.
+            Refer to sklearn.model_selection.GridSearchCV "scoring" param.
 
         Returns
         ------------
-        GridSearchCV object.
+        GridSearchCV object, x_test, y_test
         The .predict method will use the best performing model.
         Refer to sklearn.model_selection.GridSearchCV docs for full description.
+        Test set is also returned for final model evaluation.
         """
 
         x_train, x_test, y_train, y_test = train_test_split(features, target, random_state=1,
@@ -96,4 +113,67 @@ class ModelLinear:
         }
 
         grid = GridSearchCV(pipeline, param_grid, n_jobs=2, scoring=eval_metric)
-        return grid.fit(x_train, y_train)
+        return grid.fit(x_train, y_train), x_test, y_test
+
+
+    def train_loc_models(self, features = None, target = None,
+                         loc_list = None, use_grid_search = True,
+                         num_features=None, n_poly_degree=None, alpha = None,
+                         eval_metric='neg_mean_absolute_error'
+                         ):
+        """Train a separate model for each location.
+        Parameters
+        ------------
+        features: pandas.DataFrame
+            Input data (target must be removed).
+        target: pandas.DataFrame
+            Target variable, needs to have "location" column in this case.
+        loc_list: list of str
+            List of locations to fit a model to.
+            These must all be present in "features" and "target" DataFrames.
+
+        use_grid_search: bool
+            If True, run grid search for each location in loc_list.
+            All params below are only used in this case, otherwise they have no effect.
+        num_features: list, array of int
+            Potential number of features to try.
+        n_poly_degree: list, array of int
+            Potential polunomial degree to fit.
+        alpha: list, array of int
+            Potential regularization terms to try.
+        eval_metric: str
+            Metric used to compare different hyperparam combinations.
+            Refer to sklearn.model_selection.GridSearchCV "scoring" param.
+
+        Returns
+        ------------
+        A dict containing xgboost.sklearn.XGBRegressor objects.
+        If `use_grid_search` is True, then the test set for each location is also included in the list.
+        """
+
+        model_list = {}
+        x_test_list = []
+        y_test_list = []
+
+
+        for loc in loc_list:
+            print('LOCATION:', loc)
+            features_loc = features[features['location'] == loc].drop(columns=['location'])
+            target_loc = target[target['location'] == loc].drop(columns=['location']).values.ravel()
+
+            if use_grid_search:
+                model,x_test,y_test = self.grid_search(features = features_loc, target = target_loc,
+                                 num_features=num_features,
+                                n_poly_degree=n_poly_degree,
+                                alpha = alpha,
+                                 eval_metric=eval_metric)
+                model_list[loc] = model.best_estimator_
+                x_test_list.append(x_test)
+                y_test_list.append(y_test)
+            else:
+                model = self.train_model(features = features_loc, target = target_loc)
+                model_list[loc] = model.best_estimator_
+        if use_grid_search:
+            return model_list,x_test_list,y_test_list
+        else:
+            return model_list
