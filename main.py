@@ -16,10 +16,7 @@ preprop = preprocessing.Preprocessing(df_production=df_production,
 df_production = preprop.misc_production()
 
 # some cleaning of the weather data
-df_weather.drop(columns=['Unnamed: 0'], inplace=True)
-df_weather['date'] = pd.to_datetime(df_weather['date']).dt.tz_localize(None)
-df_weather.set_index('date', inplace=True)
-df_weather.sort_index(inplace=True)
+df_weather = preprop.misc_weather()
 
 # slice data to 2018 to end 2024
 df_production = preprop.slice_by_date(df=df_production, end_date='20241231')
@@ -28,10 +25,7 @@ df_weather = preprop.slice_by_date(df=df_weather, end_date='20241231')
 df_merged = preprop.merge(df_production, df_weather, merge_dim = ['date','location'] )
 
 # some feature engineering
-df_merged['day_of_year'] = df_merged.index.dayofyear
-df_merged['month'] = df_merged.index.month
-df_merged['year'] = df_merged.index.year
-df_merged['hour'] = df_merged.index.hour
+df_merged = preprop.add_time_features(df_merged)
 
 # seems like very low temps and high humidity probably lead to ice, which hurts output
 df_merged['temp_hum'] = df_merged['temperature_2m'].values * df_merged['relative_humidity_2m'].values
@@ -39,7 +33,7 @@ df_merged['temp_hum'] = df_merged['temperature_2m'].values * df_merged['relative
 # ------------------- MODEL TRAINING ------------------------------------------- #
 
 # features we want to use for training
-feature_list = ['kWh','location','year', 'month','hour','day_of_year','temperature_2m',
+feature_list = ['kWh','location', 'month','hour','day_of_year','temperature_2m',
                 'relative_humidity_2m','rain','snowfall',
                 'cloud_cover','cloud_cover_low','cloud_cover_mid',
                 'cloud_cover_high','shortwave_radiation','temp_hum']

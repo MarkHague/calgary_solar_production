@@ -71,3 +71,20 @@ class Preprocessing:
         self.df_production.loc[mask, 'kWh'] = self.df_production.loc[mask, 'kWh'] / 1000
 
         return self.df_production
+
+    def add_time_features(self, df):
+        """Convenience method to add the following time related features:
+        "day_of_year", "month","y" """
+        df['day_of_year'] = df.index.dayofyear
+        df['month'] = df.index.month
+        df['hour'] = df.index.hour
+
+        return df
+
+    def misc_weather(self):
+        self.df_weather.drop(columns=['Unnamed: 0'], inplace=True)
+        self.df_weather['date'] = pd.to_datetime(self.df_weather['date']).dt.tz_localize(None)
+        self.df_weather.set_index('date', inplace=True)
+        self.df_weather.sort_index(inplace=True)
+
+        return self.df_weather
