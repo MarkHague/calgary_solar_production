@@ -6,6 +6,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import r_regression, f_regression
 from sklearn.model_selection import train_test_split, GridSearchCV
 import numpy as np
+import pandas as pd
 
 class ModelLinear:
 
@@ -102,7 +103,7 @@ class ModelLinear:
         Test set is also returned for final model evaluation.
         """
 
-        x_train, x_test, y_train, y_test = train_test_split(features, target, random_state=1,
+        x_train, x_test, y_train, y_test = train_test_split(features, target, random_state=0,
                                                             test_size=0.2)
         pipeline = self.linear_pipeline()
 
@@ -112,7 +113,7 @@ class ModelLinear:
             'model__alpha': alpha
         }
 
-        grid = GridSearchCV(pipeline, param_grid, n_jobs=2, scoring=eval_metric)
+        grid = GridSearchCV(pipeline, param_grid, n_jobs=4, scoring=eval_metric)
         return grid.fit(x_train, y_train), x_test, y_test
 
 
@@ -168,8 +169,12 @@ class ModelLinear:
                                 alpha = alpha,
                                  eval_metric=eval_metric)
                 model_list[loc] = model.best_estimator_
+                x_test['location'] = loc
                 x_test_list.append(x_test)
-                y_test_list.append(y_test)
+                dff = pd.DataFrame(target_loc, columns=['kWh'])
+                dff.set_index(features_loc.index, inplace=True)
+                dff['location'] = loc
+                y_test_list.append(dff)
             else:
                 model = self.train_model(features = features_loc, target = target_loc)
                 model_list[loc] = model.best_estimator_

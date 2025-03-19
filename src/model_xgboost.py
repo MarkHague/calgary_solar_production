@@ -1,4 +1,5 @@
 import xgboost as xgb
+import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 
 
@@ -138,7 +139,9 @@ class ModelXGBoost:
                                  max_depth=max_depth, n_estimators=n_estimators,
                                  eval_metric=eval_metric)
                 model_list[loc] = model.best_estimator_
+                x_test['location'] = loc
                 x_test_list.append(x_test)
+                y_test['location'] = loc
                 y_test_list.append(y_test)
 
                 print('Best score:', model.best_score_)
