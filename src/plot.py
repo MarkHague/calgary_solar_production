@@ -10,7 +10,10 @@ def scatter(dataframe = None, location = None,
                  colormap = 'RdBu_r', color_fit = 'k'):
     """Scatter plot an optional third variable mapped to colormap."""
 
-    dft = dataframe[dataframe['location'] == location]
+    if location is not None:
+        dft = dataframe[dataframe['location'] == location]
+    else:
+        dft = dataframe
     ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
                          palette=colormap)
 
