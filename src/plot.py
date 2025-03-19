@@ -14,10 +14,11 @@ def scatter(dataframe = None, location = None,
         dft = dataframe[dataframe['location'] == location]
     else:
         dft = dataframe
-    ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
-                         palette=colormap)
+
 
     if color_var is not None:
+        ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
+                             palette=colormap)
         rp = sns.regplot(data=dft, x=x, y=y, marker='',
                          color=color_fit)
 
@@ -31,6 +32,7 @@ def scatter(dataframe = None, location = None,
         cbar.set_label(color_var)
 
     else:
+        ax = sns.scatterplot(data=dft, x=x, y=y)
         rp = sns.regplot(data=dft, x=x, y=y, marker='', color=color_fit)
 
 
