@@ -4,27 +4,32 @@ from scipy.stats import linregress
 import pandas as pd
 import numpy as np
 
-def scatter_3var(dataframe = None, location = None,
+def scatter(dataframe = None, location = None,
                  x = 'shortwave_radiation', y = 'kWh',
-                 color_var = 'temperature_2m',
+                 color_var = None,
                  colormap = 'RdBu_r', color_fit = 'k'):
-    """Scatter plot a third variable mapped to colormap."""
+    """Scatter plot an optional third variable mapped to colormap."""
 
     dft = dataframe[dataframe['location'] == location]
     ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
                          palette=colormap)
 
-    rp = sns.regplot(data=dft, x=x, y=y, marker='',
-                     color=color_fit)
+    if color_var is not None:
+        rp = sns.regplot(data=dft, x=x, y=y, marker='',
+                         color=color_fit)
 
-    norm = plt.Normalize(dft[color_var].min(), dft[color_var].max())
-    sm = plt.cm.ScalarMappable(cmap=colormap, norm=norm)
-    sm.set_array([])
+        norm = plt.Normalize(dft[color_var].min(), dft[color_var].max())
+        sm = plt.cm.ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
 
-    # Remove the legend and add a colorbar
-    ax.get_legend().remove()
-    cbar = ax.figure.colorbar(sm, ax=plt.gca())
-    cbar.set_label(color_var)
+        # Remove the legend and add a colorbar
+        ax.get_legend().remove()
+        cbar = ax.figure.colorbar(sm, ax=plt.gca())
+        cbar.set_label(color_var)
+
+    else:
+        rp = sns.regplot(data=dft, x=x, y=y, marker='')
+
 
     # add r2 and p-value to upper left
     lin_reg = linregress(dft[x].values, dft[y].values)
