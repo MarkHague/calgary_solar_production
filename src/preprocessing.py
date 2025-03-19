@@ -2,7 +2,7 @@ import pandas as pd
 
 
 class Preprocessing:
-
+    """Methods to prepare solar energy production data and associated weather data for training. """
     def __init__(self, df_production=None, df_weather=None):
         self.df_production = df_production
         self.df_weather = df_weather
@@ -82,7 +82,7 @@ class Preprocessing:
         return df
 
     def misc_weather(self):
-        self.df_weather.drop(columns=['Unnamed: 0'], inplace=True)
+        """Convenience method to clean up weather data. """
         self.df_weather['date'] = pd.to_datetime(self.df_weather['date']).dt.tz_localize(None)
         self.df_weather.set_index('date', inplace=True)
         self.df_weather.sort_index(inplace=True)
