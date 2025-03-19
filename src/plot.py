@@ -31,7 +31,7 @@ def scatter(dataframe = None, location = None,
         cbar.set_label(color_var)
 
     else:
-        rp = sns.regplot(data=dft, x=x, y=y, marker='')
+        rp = sns.regplot(data=dft, x=x, y=y, marker='', color=color_fit)
 
 
     # add r2 and p-value to upper left
