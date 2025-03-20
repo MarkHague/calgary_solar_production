@@ -72,3 +72,41 @@ def bar_compare_years(df = None, loc = 'Bearspaw'):
 
     g.set_axis_labels("", "Power")
     g.legend.set_title("")
+
+def get_model_preds(x_test = None, y_test = None, model = None,
+                        loc = None, df_max = None,
+                        hue_var = 'shortwave_radiation'):
+    """Get model predictions to compare test set labels.
+    Parameters
+    ------------
+    x_test: pandas.DataFrame
+    y_test: pandas.DataFrame
+    model: sklearn model with predict method
+    loc: str
+    df_max: pandas.DataFrame
+        Maximum output for each location
+    hue_var: str
+        Third variable to add to output - can be used in scatter method to shade points.
+
+    Returns
+    --------------
+    pandas.DataFrame with predictions and labels as columns, with "hue_var" as additional column
+    """
+
+    x_test_linear = x_test[x_test['location'] == loc].drop(columns=['date', 'location'])
+    preds = model[loc].predict(x_test_linear)
+    # remove bad predictions
+    max_output = df_max[df_max['location'] == loc]['kWh'].values[0]
+    preds[preds < 0.0] = 0
+    preds = np.where(preds > max_output, max_output, preds)
+    preds = np.where(x_test_linear['hour'].values < 6, 0.0, preds)
+
+    dfp = pd.DataFrame()
+    dfp['Prediction'] = preds
+    dfp['Actual'] = y_test[y_test['location'] == loc]['kWh'].values
+    dfp[hue_var] = x_test[x_test['location'] == loc][hue_var]
+
+    return dfp
+
+
+
