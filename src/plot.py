@@ -6,7 +6,7 @@ import numpy as np
 
 def scatter(dataframe = None, location = None,
                  x = 'shortwave_radiation', y = 'kWh',
-                 color_var = None,
+                 color_var = None, axes = None,
                  colormap = 'RdBu_r', color_fit = 'k'):
     """Scatter plot an optional third variable mapped to colormap."""
 
@@ -17,8 +17,13 @@ def scatter(dataframe = None, location = None,
 
 
     if color_var is not None:
-        ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
+        if axes is None:
+            ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
                              palette=colormap)
+        else:
+            ax = axes
+            sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
+                             palette=colormap, ax = ax)
         rp = sns.regplot(data=dft, x=x, y=y, marker='',
                          color=color_fit)
 
@@ -28,11 +33,14 @@ def scatter(dataframe = None, location = None,
 
         # Remove the legend and add a colorbar
         ax.get_legend().remove()
-        cbar = ax.figure.colorbar(sm, ax=plt.gca())
+        cbar = ax.figure.colorbar(sm, ax=ax)
         cbar.set_label(color_var)
 
     else:
-        ax = sns.scatterplot(data=dft, x=x, y=y)
+        if axes is None:
+            ax = sns.scatterplot(data=dft, x=x, y=y)
+        else:
+            sns.scatterplot(data=dft, x=x, y=y, ax = axes)
         rp = sns.regplot(data=dft, x=x, y=y, marker='', color=color_fit)
 
 
