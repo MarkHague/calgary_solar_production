@@ -6,7 +6,7 @@ from src import preprocessing, model_xgboost, model_linear
 # ------------------- PREPROCESSING ------------------------------------------- #
 # production data from city of calgary
 df_production = pd.read_csv('data/Solar_Energy_Production_20250219.csv')
-# historical weather data
+# get historical weather data
 df_weather = pd.read_csv('data/hourly_weather_data_ERA5_all_locs.csv')
 
 
@@ -45,15 +45,19 @@ target = df_merged[['kWh','location']]
 #  ---------------  Linear Model ------------------------ #
 
 # linear_model = model_linear.ModelLinear()
-# models_linear = linear_model.train_loc_models(features=features, target=target,
+# models_linear, x_test_lin, y_test_lin = linear_model.train_loc_models(features=features, target=target,
 #                                              loc_list=location_list,
 #                                              num_features=np.arange(3,10),
 #                                              n_poly_degree=np.arange(3,7),
 #                                              alpha=[0.1,1,10])
-
-# we now have a list of tuples (1 for each location)
-# each tuple has 3 elements: the model itself, x_test and y_test
-# with this we can compute the test error for each location
+#
+# # we now have a list of tuples (1 for each location)
+# # each tuple has 3 elements: the model itself, x_test and y_test
+# # with this we can compute the test error for each location
+# with open('trained_model_data/trained_models_linear.pkl', 'wb') as f:
+#     pickle.dump(models_linear, f)
+# pd.concat(x_test_lin).to_csv('trained_model_data/x_test_linear.csv')
+# pd.concat(y_test_lin).to_csv('trained_model_data/y_test_linear.csv')
 
 #  ---------------  XGBoost ------------------------ #
 # initialise an instance of the sklearn version of XGBoost tree ensemble
@@ -73,5 +77,5 @@ trained_model_xgboost, x_test_xgb, y_test_xgb = xgb_model.train_loc_models(
 # with this we can compute the test error for each location
 with open('trained_model_data/trained_models_xgboost.pkl', 'wb') as f:
     pickle.dump(trained_model_xgboost, f)
-pd.concat(x_test_xgb).to_csv('trained_model_data/x_test.csv')
-pd.concat(y_test_xgb).to_csv('trained_model_data/y_test.csv')
+pd.concat(x_test_xgb).to_csv('trained_model_data/x_test_xgb.csv')
+pd.concat(y_test_xgb).to_csv('trained_model_data/y_test_xgb.csv')

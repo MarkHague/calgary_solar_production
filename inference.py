@@ -9,6 +9,9 @@ datam = data_manager.DataManager(
     hourly_vars=["temperature_2m", "relative_humidity_2m", "rain", "snowfall", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "shortwave_radiation"],
     models="best_match")
 
+# load the max output at each location to fix bad predictions
+df_max_out = pd.read_csv('data/max_output_each_location.csv')
+
 # grab the latest 7-day forecast, clean it up to pass into model
 df_weather = datam.get_data(mode = 'forecast')
 preprop= preprocessing.Preprocessing(df_weather=df_weather)
@@ -40,6 +43,9 @@ for loc in datam.locations:
     predicted[predicted < 0] = 0
     # year-round night time should also be zero
     predicted = np.where(df_bm_pred['hour'].values < 6, 0.0, predicted)
+    # values higher than the max ever recorded should be brought back down
+    max_output = df_max_out[df_max_out['location'] == loc]['kWh'].values[0]
+    predicted = np.where(predicted > max_output, max_output, predicted)
     pred_df[loc] = predicted
 
 pred_df['sum'] = pred_df.sum(axis = 1)
