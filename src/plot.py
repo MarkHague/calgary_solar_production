@@ -49,8 +49,8 @@ def scatter(dataframe = None, location = None,
 
     # add r2 and p-value to upper left
     lin_reg = linregress(dft[x].values, dft[y].values)
-    axes.text(.02, .95, '$R^2 = $' + '{0:.2f}'.format(lin_reg.rvalue ** 2), transform=axes.transAxes)
-    axes.text(.02, .9, 'p = ' + '{0:.2f}'.format(lin_reg.pvalue), transform=axes.transAxes)
+    axes.text(.02, .9, '$R^2 = $' + '{0:.2f}'.format(lin_reg.rvalue ** 2), transform=axes.transAxes)
+    axes.text(.02, .85, 'p = ' + '{0:.2f}'.format(lin_reg.pvalue), transform=axes.transAxes)
 
 def bar_compare_years(df = None, loc = 'Bearspaw'):
     """Compare solar production with incoming energy from the sun for each year
