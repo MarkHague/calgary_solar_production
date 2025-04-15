@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import r_regression, f_regression
+from sklearn.feature_selection import r_regression
 from sklearn.model_selection import train_test_split, GridSearchCV
 import numpy as np
 import pandas as pd
@@ -149,7 +149,7 @@ class ModelLinear:
         Returns
         ------------
         A dict containing xgboost.sklearn.XGBRegressor objects.
-        If `use_grid_search` is True, then the test set for each location is also included in the list.
+        If `use_grid_search` is True, then the test set pandas.DataFrame for each location is also included in the list.
         """
 
         model_list = {}

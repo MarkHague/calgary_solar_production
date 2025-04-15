@@ -18,36 +18,39 @@ def scatter(dataframe = None, location = None,
 
     if color_var is not None:
         if axes is None:
-            ax = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
+            axes = sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
                              palette=colormap)
+            rp = sns.regplot(data=dft, x=x, y=y, scatter=False,
+                             color=color_fit, ax = axes)
         else:
-            ax = axes
             sns.scatterplot(data=dft, x=x, y=y, hue=color_var,
-                             palette=colormap, ax = ax)
-        rp = sns.regplot(data=dft, x=x, y=y, marker='',
-                         color=color_fit)
+                                 palette=colormap, ax = axes)
+            rp = sns.regplot(data=dft, x=x, y=y, scatter=False,
+                             color=color_fit, ax = axes)
 
         norm = plt.Normalize(dft[color_var].min(), dft[color_var].max())
         sm = plt.cm.ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
 
         # Remove the legend and add a colorbar
-        ax.get_legend().remove()
-        cbar = ax.figure.colorbar(sm, ax=ax)
+        legend = axes.get_legend()
+        if legend is not None:
+            legend.remove()
+        cbar = axes.figure.colorbar(sm, ax=axes)
         cbar.set_label(color_var)
 
     else:
         if axes is None:
-            ax = sns.scatterplot(data=dft, x=x, y=y)
+            axes = sns.scatterplot(data=dft, x=x, y=y)
         else:
             sns.scatterplot(data=dft, x=x, y=y, ax = axes)
-        rp = sns.regplot(data=dft, x=x, y=y, marker='', color=color_fit)
+        rp = sns.regplot(data=dft, x=x, y=y, marker='', color=color_fit, ax = axes)
 
 
     # add r2 and p-value to upper left
     lin_reg = linregress(dft[x].values, dft[y].values)
-    ax.text(.02, .95, '$R^2 = $' + '{0:.2f}'.format(lin_reg.rvalue ** 2), transform=ax.transAxes)
-    ax.text(.02, .9, 'p = ' + '{0:.2f}'.format(lin_reg.pvalue), transform=ax.transAxes)
+    axes.text(.02, .95, '$R^2 = $' + '{0:.2f}'.format(lin_reg.rvalue ** 2), transform=axes.transAxes)
+    axes.text(.02, .9, 'p = ' + '{0:.2f}'.format(lin_reg.pvalue), transform=axes.transAxes)
 
 def bar_compare_years(df = None, loc = 'Bearspaw'):
     """Compare solar production with incoming energy from the sun for each year
@@ -112,7 +115,7 @@ def get_model_preds(x_test = None, y_test = None, model = None,
     dfp = pd.DataFrame()
     dfp['Prediction'] = preds
     dfp['Actual'] = y_test[y_test['location'] == loc]['kWh'].values
-    dfp[hue_var] = x_test[x_test['location'] == loc][hue_var]
+    dfp[hue_var] = x_test[x_test['location'] == loc][hue_var].values
 
     return dfp
 
